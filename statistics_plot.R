@@ -11,21 +11,15 @@ library(reshape2)
 library(plyr)
 library(dplyr)
 library(RColorBrewer)
-library(Cairo)
+# library(Cairo)
 library(ggpubr)
+
 
 
 #################################################
 #### Data preprocess
-raw_df <- read_excel('/Users/chenda/OneDrive/PLTTECH/Project/20190807肝癌分类/肝癌_长度亚群/Rawdata/rawdata.xlsx')
-raw_df <-  raw_df[raw_df['id'] != 'B015A', ]
-raw_df <-  raw_df[raw_df['id'] != 'B040', ]
-raw_df <-  raw_df[raw_df['id'] != 'B043', ]
-raw_df <-  raw_df[raw_df['id'] != 'B047', ]
-
-subsets <- c("id", "effector CD4+ T cells", "viable/singlets", "naive CD8+ T cells", "monocytes", "CD20- CD3- lymphocytes", 
-             "CD85j+CD8+ T cells", "CD4+CD28+ T cells", "IgD-CD27- B cells", "IgD+CD27+ B cells", "class")
-df <- as.data.frame(raw_df)[, subsets]
+# df <- read_csv('/Users/chenda/OneDrive/PLTTECH/Project/20190819心血管分析/01CHD早筛建模/Output/select_df.csv')
+df <- read.csv('C:/Users/pc/OneDrive/PLTTECH/Project/20191030肺癌分类模型/Output/select_df.csv')
 df$class <- as.factor(df$class)
 
 
@@ -37,7 +31,7 @@ box_plot_p <- function(df, test_type="p") {
   group2_index <- which(df$class == group_name[2])
   
   # t test
-  pval <- apply(df[, 2:10], 2, function(x) t.test(x[group1_index], x[group2_index], alternative = "two.sided")$p.value)
+  pval <- apply(df[, 2:(dim(df)[2]-1)], 2, function(x) t.test(x[group1_index], x[group2_index], alternative = "two.sided")$p.value)
   pval_adjust <- p.adjust(pval, method = "BH")
   pval_cut <- cut(pval, breaks = c(0, 0.001, 0.01, 0.05, 1),
                   labels = c("***", "**", "*", ""))
@@ -64,7 +58,7 @@ box_plot_p <- function(df, test_type="p") {
   
   # Add varibles
   ggdf_plot1$pval <- rep(pval_cut, each = nrow(df))
-  ggdf_plot1$maxfrequency <- rep(apply(df[,2:10], 2, max), each = nrow(df))
+  ggdf_plot1$maxfrequency <- rep(apply(df[,2:(dim(df)[2]-1)], 2, max), each = nrow(df))
   ggdf_plot1$linex <- rep(c(1:2), length.out = nrow(ggdf_plot1))
   ggdf_plot1$linex[which(ggdf_plot1$pval == "")] <- NA
   
@@ -108,29 +102,29 @@ box_plot_p <- function(df, test_type="p") {
   }
 }
 
-box_plot_p(df, test_type = "bh")
+box_plot_p(df, test_type = "p")
 
 
 #####################################################
 ####                Robust Plot
-iqr <- 0.7413 * IQR(df$`effector CD4+ T cells`)
-iqr <- apply(df[, 2:10], 2, function(x) 0.7413 * IQR(x))
-med <- apply(df[, 2:10], 2, function(x) median(x))
-
-robust_plot <- function(index) {
-  z <- (df[, index+1] - med[[index]]) / iqr[[index]]
-  z_df <- as.data.frame(z)
-  colnames(z_df) <- colnames(df)[index+1]
-  z_df
-}
-
-robust_df <- as.data.frame(df$id)
-colnames(robust_df) <- "id"
-for (i in c(1:9)) {
-  robust_df[colnames(df)[i+1]] <- robust_plot(i)
-}
-robust_df$class <- df$class
-
-box_plot_p(df = robust_df)
-
-box_plot_p(df = robust_df, test_type = "bh")
+# iqr <- 0.7413 * IQR(df$`effector CD4+ T cells`)
+# iqr <- apply(df[, 2:10], 2, function(x) 0.7413 * IQR(x))
+# med <- apply(df[, 2:10], 2, function(x) median(x))
+# 
+# robust_plot <- function(index) {
+#   z <- (df[, index+1] - med[[index]]) / iqr[[index]]
+#   z_df <- as.data.frame(z)
+#   colnames(z_df) <- colnames(df)[index+1]
+#   z_df
+# }
+# 
+# robust_df <- as.data.frame(df$id)
+# colnames(robust_df) <- "id"
+# for (i in c(1:9)) {
+#   robust_df[colnames(df)[i+1]] <- robust_plot(i)
+# }
+# robust_df$class <- df$class
+# 
+# box_plot_p(df = robust_df)
+# 
+# box_plot_p(df = robust_df, test_type = "bh")
