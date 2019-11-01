@@ -18,7 +18,7 @@ plt.style.use('seaborn-colorblind')
 
 
 
-def split_func(data_frame, size=0.9):
+def split_func(data_frame, size=0.8):
     """
     Split the data into two data set
     :param data_frame: the name of input data
@@ -43,27 +43,48 @@ def split_func(data_frame, size=0.9):
     return train, test
 
 
+# def balance_train(data_frame, more_label=0, less_label=1):
+#     '''
+#     Balance number of positive and negative cases in data_frame
+#     # 过采样
+#     :param data_frame:
+#     :return:
+#     '''
+#     more_class = data_frame[data_frame['class'] == more_label]
+#     less_class  = data_frame[data_frame['class'] == less_label]
+#     num = len(more_class) - len(less_class)
+#     for i in range(num):
+#         less_index = list(less_class.index)
+#         index_choose  = random.sample(less_index, 1)[0]
+#         more_class = more_class.append(less_class.loc[index_choose])
+#     more_class = more_class.append(less_class)
+#     data_frame = pd.DataFrame(more_class.values, index=[i for i in range(len(more_class))],
+#                               columns=more_class.columns)
+#     return data_frame
+
+
+
 def balance_train(data_frame, more_label=0, less_label=1):
     '''
     Balance number of positive and negative cases in data_frame
+    # 欠采样
     :param data_frame:
     :return:
     '''
     more_class = data_frame[data_frame['class'] == more_label]
     less_class  = data_frame[data_frame['class'] == less_label]
-    num = len(more_class) - len(less_class)
+    num = len(less_class)
     for i in range(num):
-        less_index = list(less_class.index)
-        index_choose  = random.sample(less_index, 1)[0]
-        more_class = more_class.append(less_class.loc[index_choose])
-    more_class = more_class.append(less_class)
-    data_frame = pd.DataFrame(more_class.values, index=[i for i in range(len(more_class))],
-                              columns=more_class.columns)
+        more_index = list(more_class.index)
+        index_choose = random.sample(more_index, 1)[0]
+        less_class = less_class.append(more_class.loc[index_choose])
+    data_frame = pd.DataFrame(less_class.values, index=[i for i in range(len(less_class))],
+                               columns=less_class.columns)
     return data_frame
 
 
 
-def lr_regression(df, penalty='l1', C=1):
+def lr_regression(df, penalty='l1', C=0.1):
     train_df_raw, test_df = split_func(df)
     train_df = balance_train(train_df_raw)
     # stdc = StandardScaler()
@@ -74,6 +95,7 @@ def lr_regression(df, penalty='l1', C=1):
     lr = LogisticRegression(penalty=penalty, C=C)
     lr.fit(x_train, train_df['class'].values.astype('int'))
     # print(lr.coef_)
+    print(len([i for i in lr.coef_[0] if i != 0]))
     train_score = lr.score(x_train, train_df['class'].values.astype('int'))
     test_score = lr.score(x_test, test_df['class'].values.astype('int'))
     print('Train score is %s' % train_score)
@@ -100,7 +122,7 @@ def feature_select(df, features_num=52):
     for i in range(5000):
         train_score, test_score, coefs, intercept = lr_regression(df)
         all_test_score[i] = test_score
-        if test_score >= 0.7:
+        if test_score >= 0.8:
             coefs_dict[i] = coefs
             intercept_dict[i] = intercept
             score_train_dict[i] = train_score
@@ -129,7 +151,7 @@ def coef_caculate(data):
         train_score, test_score, coefs, intercept = lr_regression(data, penalty='l2')
         all_train_score[i] = train_score
         all_test_score[i] = test_score
-        if test_score >= 0.75:
+        if test_score == 1:
             coefs_dict[i] = coefs
             intercept_list.append(intercept)
         else:
@@ -162,6 +184,7 @@ def final_model(df):
     predict_df = predict_df.reindex(columns=['id', 'pro', 'class'])
     positive = predict_df[predict_df['class'] == 1]
     negtive = predict_df[predict_df['class'] == 0]
+    plt.figure(figsize=(20, 12))
     plt.scatter(x=positive['id'], y=positive['pro'], color='red')
     plt.scatter(x=negtive['id'], y=negtive['pro'], color='blue')
     plt.axhline(y=0.5, color='grey', linestyle='--', alpha=0.6)
@@ -173,15 +196,19 @@ def final_model(df):
 
 
 if __name__ == '__main__':
-    path = input('请输入项目路径:')
-    df_name = input('请输入数据文件名:')
+    # path = input('请输入项目路径:')
+    path = 'C:/Users/pc/OneDrive/PLTTECH/Project/20191101肝癌分类模型更新/'
+    # df_name = input('请输入数据文件名:')
+    df_name = 'liver_all'
     df = pd.read_excel(path + 'Rawdata/' + df_name + '.xlsx')
+    df['id'] = df['id'].apply(lambda x:str(x))
 
 
     # 亚群选择
     features_index, all_test_score, feature_counter = feature_select(df)
     feature_all = list(df.columns[1:-1])
     print(sorted(feature_counter.items(), key=lambda x:x[1], reverse=True))
+
     select_feature_num = input('请输入所选特征个数:')
     select_feature_name = [feature_all[i] for i in features_index[:int(select_feature_num)]]
     print(select_feature_name)
@@ -190,14 +217,20 @@ if __name__ == '__main__':
     select_feature_name.append('class')
     select_df = df.loc[:, select_feature_name]
     select_train_df_raw, select_test_df = split_func(select_df)
-    select_train_df = balance_train(select_train_df_raw)
+    # select_train_df = balance_train(select_train_df_raw)
 
 
     # 训练模型
-    coef_final, intercept_final, test_score = coef_caculate(data=select_train_df)
+    coef_final, intercept_final, test_score = coef_caculate(data=select_train_df_raw)
 
     predicts = final_model(df=select_test_df)
     predicts_all = final_model(df=select_df)
+
+
+    # 新数据测试模型
+    # new_df = pd.read_excel('C:/Users/pc/OneDrive/PLTTECH/Project/20191024肝癌预测/Rawdata/healthy_new.xlsx')
+    # new_df = new_df.loc[:, select_feature_name]
+    # pre_new = final_model(df=new_df)
 
 
     # 对流程中的数据进行保存
