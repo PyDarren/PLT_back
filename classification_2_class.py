@@ -234,21 +234,21 @@ if __name__ == '__main__':
 
 
     # 对流程中的数据进行保存
-    test_score.T.to_csv(path + 'Output/test_score_distribution.csv')
-    predicts.to_csv(path + 'Output/predicts.csv')
-    predicts_all.to_csv(path + 'Output/predicts_all.csv')
+    # test_score.T.to_csv(path + 'Output/test_score_distribution.csv')
+    # predicts.to_csv(path + 'Output/predicts.csv')
+    # predicts_all.to_csv(path + 'Output/predicts_all.csv')
 
-    coef_df = pd.DataFrame(select_feature_name[1:-1], columns=['Subsets'])
-    coef_df['coefs'] = coef_final
-    coef_df.to_csv(path + 'Output/coef_df.csv')
+    # coef_df = pd.DataFrame(select_feature_name[1:-1], columns=['Subsets'])
+    # coef_df['coefs'] = coef_final
+    # coef_df.to_csv(path + 'Output/coef_df.csv')
 
-    intercept_list = list()
-    intercept_list.append(intercept_final)
-    pd.DataFrame(intercept_list, columns=['intercept']).to_csv(path + 'Output/intercept_df.csv')
+    # intercept_list = list()
+    # intercept_list.append(intercept_final)
+    # pd.DataFrame(intercept_list, columns=['intercept']).to_csv(path + 'Output/intercept_df.csv')
 
-    select_df.columns = select_feature_name
-    select_df.to_csv(path + 'Output/select_df.csv', index=False)
+    # select_df.columns = select_feature_name
+    # select_df.to_csv(path + 'Output/select_df.csv', index=False)
 
-    select_test_df.to_csv(path + 'Output/select_test.csv', index=False)
-    select_train_df_raw.to_csv(path + 'Output/select_train.csv', index=False)
+    # select_test_df.to_csv(path + 'Output/select_test.csv', index=False)
+    # select_train_df_raw.to_csv(path + 'Output/select_train.csv', index=False)
 
