@@ -1,5 +1,5 @@
 # Created by: Chen Da
-# Created on: 2019/8/12
+# Created on: 2019/12/27
 
 library(tidyverse)
 library(readxl)
@@ -18,9 +18,10 @@ library(ggpubr)
 
 #################################################
 #### Data preprocess
-df <- read_csv('C:/Users/pc/OneDrive/PLTTECH/Project/02_Disease_early_screening/lung_cancer/rawdata/marker_all.csv')
+df <- read_csv('C:/Users/pc/OneDrive/PLTTECH/Project/02_Disease_early_screening/lung_cancer/rawdata/all.csv')
 # df <- read_csv('/Users/chenda/OneDrive/PLTTECH/Project/20191205_lung_cancer/rawdata/all.csv')
 df$class <- as.factor(df$class)
+
 
 
 ################################################
@@ -102,29 +103,4 @@ box_plot_p <- function(df, test_type="p") {
   }
 }
 
-box_plot_p(df, test_type = "bh")
-
-
-#####################################################
-####                Robust Plot
-# iqr <- 0.7413 * IQR(df$`effector CD4+ T cells`)
-# iqr <- apply(df[, 2:10], 2, function(x) 0.7413 * IQR(x))
-# med <- apply(df[, 2:10], 2, function(x) median(x))
-# 
-# robust_plot <- function(index) {
-#   z <- (df[, index+1] - med[[index]]) / iqr[[index]]
-#   z_df <- as.data.frame(z)
-#   colnames(z_df) <- colnames(df)[index+1]
-#   z_df
-# }
-# 
-# robust_df <- as.data.frame(df$id)
-# colnames(robust_df) <- "id"
-# for (i in c(1:9)) {
-#   robust_df[colnames(df)[i+1]] <- robust_plot(i)
-# }
-# robust_df$class <- df$class
-# 
-# box_plot_p(df = robust_df)
-# 
-# box_plot_p(df = robust_df, test_type = "bh")
+box_plot_p(df, test_type = "p")

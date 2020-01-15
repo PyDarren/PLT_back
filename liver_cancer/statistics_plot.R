@@ -18,7 +18,7 @@ library(ggpubr)
 
 #################################################
 #### Data preprocess
-df <- read_csv('C:/Users/pc/OneDrive/PLTTECH/Project/02_Disease_early_screening/lung_cancer/rawdata/marker_all.csv')
+df <- read_csv('C:/Users/pc/OneDrive/PLTTECH/Project/02_Disease_early_screening/liver_cancer/rawdata/raw_data.csv')
 # df <- read_csv('/Users/chenda/OneDrive/PLTTECH/Project/20191205_lung_cancer/rawdata/all.csv')
 df$class <- as.factor(df$class)
 
@@ -102,7 +102,7 @@ box_plot_p <- function(df, test_type="p") {
   }
 }
 
-box_plot_p(df, test_type = "bh")
+box_plot_p(df, test_type = "p")
 
 
 #####################################################
